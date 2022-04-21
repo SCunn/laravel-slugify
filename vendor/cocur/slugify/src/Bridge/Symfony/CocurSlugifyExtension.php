@@ -15,6 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * CocurSlugifyExtension
@@ -43,7 +44,7 @@ class CocurSlugifyExtension extends Extension
         }
 
         // Extract slugify arguments from config
-        $slugifyArguments = array_intersect_key($config, array_flip(['lowercase', 'separator', 'regexp', 'rulesets']));
+        $slugifyArguments = array_intersect_key($config, array_flip(['lowercase', 'trim', 'strip_tags', 'separator', 'regexp', 'rulesets']));
 
         $container->setDefinition('cocur_slugify', new Definition('Cocur\Slugify\Slugify', [$slugifyArguments]));
         $container
@@ -57,5 +58,10 @@ class CocurSlugifyExtension extends Extension
             ->addTag('twig.extension')
             ->setPublic(false);
         $container->setAlias('slugify', 'cocur_slugify');
+
+        // for symfony versions >= 3.3
+        if (Kernel::VERSION_ID >= 30300) {
+            $container->setAlias('Cocur\Slugify\SlugifyInterface', 'cocur_slugify');
+        }
     }
 }
